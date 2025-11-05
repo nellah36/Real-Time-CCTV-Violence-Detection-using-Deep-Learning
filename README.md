@@ -1,103 +1,11 @@
-[Sorry, this codebase is no longer maintained! But the codes would still be useful for building video recognition deep learning pipelines. There might be some bugs and missing links to datasets (please collect data from the original source of these public datasets)!]
-
-<h1 align="center">
-<p><a href="https://arxiv.org/abs/2102.10590">Efficient Two-Stream Network for Violence Detection Using Separable Convolutional LSTM</a>
-</h1>
-<h6 align="center">
-<p> <a href="https://github.com/Zedd1558">Zahidul Islam</a>, Mohammad Rukonuzzaman, Raiyan Ahmed, Md. Hasanul Kabir, Moshiur Farazi
-</h3>
-<!---
-<p align="center">
- <img alt="cover" src="https://github.com/Zedd1558/traffic-sign-recognition-tutorial-code/blob/master/documentation/overview.jpg" height="60%" width="60%">
-</p>
--->
-
-This repository contains the codes for our [[PAPER]](https://arxiv.org/abs/2102.10590) on violence detection titled *Efficient Two-Stream Network for Violence Detection Using Separable Convolutional LSTM* which is accepted to be presented at Int'l Joint Conference on Neural Networks (IJCNN) 2021. 
-
-### Dataset preparation
-To get RWF2000 dataset,
-1. go to github.com/mchengny/RWF2000-Video-Database-for-Violence-Detection
-2. sign their agreement sheet to get the download link from them. 
-3. prepare the downloaded dataset like the following folder structure, 
-```
-📦project_directory
-  ┣ 📂RWF-2000
-    ┣ 📂train
-      ┣ 📂fight
-      ┣ 📂nonFight
-    ┣ 📂test
-      ┣ 📂fight
-      ┣ 📂nonFight
-```
-4. When running *train.py* for the first time, pass the argument *--preprocessData*, this will uniformly sample 32 frames from each video, remove black borders and save them as *.npy* files. During the next times no need to pass the argument *--preprocessData*, as you already have converted the videos into *.npy* files during the first time.
-
-Hockey and Movies dataset can be downloaded from these links - 
-
-[Hockey_Dataset](https://www.kaggle.com/datasets/yassershrief/hockey-fight-vidoes)
-
-[Movies_Dataset](https://academictorrents.com/details/70e0794e2292fc051a13f05ea6f5b6c16f3d3635)
-
-Then, preprocess the datasets in the same way as rwf2000 dataset.
-
-### How to run
-#### train
-To train models go to project directory and run *train.py* like below, 
-```
-python train.py --dataset rwf2000 --vidLen 32 --batchSize 4 --numEpochs 150 --mode both --preprocessData --lstmType sepconv --savePath FOLDER_TO_SAVE_MODELS
-```
-The training curves and history will be saved in *./results* and updated after every epoch. 
-
-#### evaluate
-To evaluate an already trained model, use *evaluate.py* like below,
-
-```
-python evaluate.py --dataset rwf2000 --vidLen 32 --batchSize 4 --mode both --lstmType sepconv --fusionType M --weightsPath PATH_TO_SAVED_MODEL
-```
-this will save the results in *test_results.csv*.
-
-#### run evaluate.py on trained_models
-The trained models weigths are available in the drive folder [trained_models](https://drive.google.com/drive/folders/1igx-plktW069IgXyWg3H78AKuTg-jCza?usp=sharing). Copy the model you want to use into your project directory like shown below. Then you can evaluate the trained_model like below.
-
-![trained_model_evaluate](https://github.com/Zedd1558/TwoStreamSepConvLSTM_ViolenceDetection/blob/master/imgs/3.png)
-
-```
-python evaluate.py --dataset rwf2000 --vidLen 32 --batchSize 4 --mode both --lstmType sepconv --fusionType M --weightsPath "/content/violenceDetection/model/rwf2000_model"
-```
-
-#### loading trained_models weights inside script
-The trained models weigths are available in the drive folder [trained_models](https://drive.google.com/drive/folders/1igx-plktW069IgXyWg3H78AKuTg-jCza?usp=sharing). Copy the entire folder and its contents into the project directory. Then you can use the trained models like shown below.
-``` python
-path = "./trained_models/rwf2000_model/sepconvlstm-M/model/rwf2000_model"     
-# path = "./trained_models/movies/sepconvlstm-A/model/movies_model"   
-model =  models.getProposedModelM(...) # build the model
-model.load_weights(path) # load the weights
-```
-The folder also contains training history, training curves and test results. 
-
-### Required libraries
-Python 3.7, Tensorflow 2.3.1, OpenCV 4.1.2, Numpy, Matplotlib, sci-kit learn
-```
-pip install -r requirements.txt
-```
-
-### Bibtex
-If you do use ideas from the paper in your work please cite as below:
-```
-@misc{islam2021efficient,
-      title={Efficient Two-Stream Network for Violence Detection Using Separable Convolutional LSTM}, 
-      author={Zahidul Islam and Mohammad Rukonuzzaman and Raiyan Ahmed and Md. Hasanul Kabir and Moshiur Farazi},
-      year={2021},
-      eprint={2102.10590},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
-}
-```
-
-<!---
-### Implementation
-<p align="center">
-  <img src="link" width="200" />
-    <img src="link" width="200" />
-</p>
-<a href="link">here</a>.
--->
+Two-Stream SepConvLSTM for Real-Time Violence Detection (RWF-2000)This project implements an efficient deep learning solution for classifying video clips as "Fight" or "NonFight" using a custom Two-Stream MobileNetV2 + SepConvLSTM Network. The goal is to create a fast, resource-optimized model suitable for real-time CCTV surveillance applications. The code is based on the repository: https://github.com/zahid58/TwoStreamSepConvLSTM_ViolenceDetection.1. Core Model ArchitectureThe network is built upon the Two-Stream principle  to effectively capture both static visual context and rapid movement.Spatial Stream (The "What"): Analyzes individual frames to recognize scene content (people, objects). Uses MobileNetV2.Temporal Stream (The "How"): Analyzes the difference between successive frames to isolate and track rapid motion. Uses MobileNetV2 on motion features.Sequential Modeler: Both streams feed into dedicated SepConvLSTM layers, crucial for learning long-term dependencies over the sequence.Fusion: We use Concatenation Fusion (fusionType C) where the final outputs from both streams are joined before the final classification layers.Sequence Length: The model was trained and designed to analyze sequences of 8 frames ($\mathbf{T=8}$).2. Environment and SetupThe project was executed in a dedicated Python virtual environment with GPU acceleration configured for performance.Code Source: https://github.com/zahid58/TwoStreamSepConvLSTM_ViolenceDetectionGPU Setup: Utilized NVIDIA CUDA and cuDNN to enable GPU acceleration (RTX 3050 Ti).Dependencies: All dependencies must be installed via the provided requirements.txt file.3. Training and Performance SummaryTraining was conducted across multiple phases on the RWF-2000 dataset, totaling approximately 57 epochs.MetricValueInterpretationTotal Epochs$\approx 57$Cumulative training time.Peak Training Accuracy$78\%$High performance on the seen data.Peak Validation Accuracy$70\%$Lower performance on unseen data.Current StateOverfitting ($\mathbf{8\%}$ gap)Indicates a need for Hyperparameter Tuning (e.g., increasing dropout, stronger regularization).4. File Structure and Data PathsThe project relies on specific local directory paths for the dataset and saved model checkpoints on the local D: drive.Data ComponentLocal PathScript Argument RolePreprocessed DataD:\rwf2000\processed\valInput to --dataPath D:/rwf2000/processedModel WeightsD:\fela_resultsInput to --weightsPath D:/fela_resultsBest CheckpointD:\fela_results\rwf2000_best_val_acc_ModelThe file prefix for the saved weights.5. Current Blocking Issue and Debug ResolutionThe project is currently paused at the Evaluation Phase due to a critical ValueError when loading weights in evaluate.py.A. The Problem (Shape Mismatch)The $\text{SepConvLSTM}$ layer expects a sequence length of $\mathbf{8}$ time steps (the trained length), but the DataGenerator was incorrectly attempting to sample batches using $\mathbf{32}$ frames (the length of the physical NPY files). This $\mathbf{32} \ne \mathbf{8}$ mismatch in the sequence dimension prevented the weights from loading.B. The ResolutionThe evaluate.py script was modified to enforce consistency using the --modelVidLen argument:Correct Model Instantiation: We use --modelVidLen 8 to build the model structure that matches the saved weights.Correct Data Sampling: The DataGenerator is now instantiated with target_frames = modelVidLen, ensuring it correctly samples 8 frames from the $\mathbf{32}$-frame clips for batch processing.Loading Command: We use model.load_weights().expect_partial() to successfully force the load.C. Evaluation Execution Command (After Fix)To run the final evaluation, execute the following command:python evaluate.py \
+  --dataset rwf2000 \
+  --batchSize 4 \
+  --mode both \
+  --lstmType sepconv \
+  --fusionType C \
+  --dataPath D:/rwf2000/processed \
+  --weightsPath D:/fela_results \
+  --vidLen 32 \
+  --modelVidLen 8
+6. Next StepsRun Evaluation: Obtain the final test accuracy using the corrected script.Hyperparameter Tuning: Address the $\mathbf{8\%}$ overfitting gap. This will involve modifying train.py to explore strategies like increasing dropout, applying L2 regularization, and enhancing data augmentation techniques.
