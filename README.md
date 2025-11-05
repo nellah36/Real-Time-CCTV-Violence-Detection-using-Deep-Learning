@@ -1,4 +1,84 @@
-Two-Stream SepConvLSTM for Real-Time Violence Detection (RWF-2000)This project implements an efficient deep learning solution for classifying video clips as "Fight" or "NonFight" using a custom Two-Stream MobileNetV2 + SepConvLSTM Network. The goal is to create a fast, resource-optimized model suitable for real-time CCTV surveillance applications. The code is based on the repository: https://github.com/zahid58/TwoStreamSepConvLSTM_ViolenceDetection.1. Core Model ArchitectureThe network is built upon the Two-Stream principle  to effectively capture both static visual context and rapid movement.Spatial Stream (The "What"): Analyzes individual frames to recognize scene content (people, objects). Uses MobileNetV2.Temporal Stream (The "How"): Analyzes the difference between successive frames to isolate and track rapid motion. Uses MobileNetV2 on motion features.Sequential Modeler: Both streams feed into dedicated SepConvLSTM layers, crucial for learning long-term dependencies over the sequence.Fusion: We use Concatenation Fusion (fusionType C) where the final outputs from both streams are joined before the final classification layers.Sequence Length: The model was trained and designed to analyze sequences of 8 frames ($\mathbf{T=8}$).2. Environment and SetupThe project was executed in a dedicated Python virtual environment with GPU acceleration configured for performance.Code Source: https://github.com/zahid58/TwoStreamSepConvLSTM_ViolenceDetectionGPU Setup: Utilized NVIDIA CUDA and cuDNN to enable GPU acceleration (RTX 3050 Ti).Dependencies: All dependencies must be installed via the provided requirements.txt file.3. Training and Performance SummaryTraining was conducted across multiple phases on the RWF-2000 dataset, totaling approximately 57 epochs.MetricValueInterpretationTotal Epochs$\approx 57$Cumulative training time.Peak Training Accuracy$78\%$High performance on the seen data.Peak Validation Accuracy$70\%$Lower performance on unseen data.Current StateOverfitting ($\mathbf{8\%}$ gap)Indicates a need for Hyperparameter Tuning (e.g., increasing dropout, stronger regularization).4. File Structure and Data PathsThe project relies on specific local directory paths for the dataset and saved model checkpoints on the local D: drive.Data ComponentLocal PathScript Argument RolePreprocessed DataD:\rwf2000\processed\valInput to --dataPath D:/rwf2000/processedModel WeightsD:\fela_resultsInput to --weightsPath D:/fela_resultsBest CheckpointD:\fela_results\rwf2000_best_val_acc_ModelThe file prefix for the saved weights.5. Current Blocking Issue and Debug ResolutionThe project is currently paused at the Evaluation Phase due to a critical ValueError when loading weights in evaluate.py.A. The Problem (Shape Mismatch)The $\text{SepConvLSTM}$ layer expects a sequence length of $\mathbf{8}$ time steps (the trained length), but the DataGenerator was incorrectly attempting to sample batches using $\mathbf{32}$ frames (the length of the physical NPY files). This $\mathbf{32} \ne \mathbf{8}$ mismatch in the sequence dimension prevented the weights from loading.B. The ResolutionThe evaluate.py script was modified to enforce consistency using the --modelVidLen argument:Correct Model Instantiation: We use --modelVidLen 8 to build the model structure that matches the saved weights.Correct Data Sampling: The DataGenerator is now instantiated with target_frames = modelVidLen, ensuring it correctly samples 8 frames from the $\mathbf{32}$-frame clips for batch processing.Loading Command: We use model.load_weights().expect_partial() to successfully force the load.C. Evaluation Execution Command (After Fix)To run the final evaluation, execute the following command:python evaluate.py \
+# Two-Stream SepConvLSTM for Real-Time Violence Detection (RWF-2000)
+
+This project implements an efficient deep learning solution for classifying video clips as **"Fight"** or **"NonFight"** using a **Two-Stream MobileNetV2 + SepConvLSTM Network**. The model is optimized for **real-time CCTV surveillance**.
+
+**Reference Repository:** [TwoStreamSepConvLSTM_ViolenceDetection](https://github.com/zahid58/TwoStreamSepConvLSTM_ViolenceDetection)
+
+---
+
+## 1. Core Model Architecture
+
+The model uses the **Two-Stream principle** to capture both spatial and temporal information:
+
+| Stream | Purpose | Architecture |
+|--------|---------|--------------|
+| **Spatial Stream ("What")** | Recognizes static scene content (people, objects) | MobileNetV2 on individual frames |
+| **Temporal Stream ("How")** | Detects motion between successive frames | MobileNetV2 on motion difference frames |
+| **Sequential Modeling** | Learn long-term dependencies | SepConvLSTM layers |
+| **Fusion** | Combine both streams | Concatenation Fusion (`fusionType C`) |
+| **Sequence Length** | Number of frames per clip | 8 frames (`T = 8`) |
+
+---
+
+## 2. Environment & Setup
+
+- **Python Virtual Environment** with GPU support.  
+- **GPU:** NVIDIA RTX 3050 Ti (CUDA + cuDNN).  
+- **Dependencies:** Install via `requirements.txt`:
+
+\`\`\`bash
+pip install -r requirements.txt
+\`\`\`
+
+---
+
+## 3. Training & Performance
+
+**RWF-2000 Dataset Training Summary (≈57 epochs):**
+
+| Metric | Value | Interpretation |
+|--------|-------|----------------|
+| Peak Training Accuracy | 78% | High on training data |
+| Peak Validation Accuracy | 70% | Moderate generalization |
+| Gap (Overfitting) | 8% | Needs hyperparameter tuning |
+
+**Next Steps:** Improve generalization by adjusting **dropout, L2 regularization**, and **data augmentation**.
+
+---
+
+## 4. File Structure & Paths
+
+| Component | Local Path | Purpose |
+|-----------|------------|---------|
+| Preprocessed Data | `D:\rwf2000\processed\val` | Input to `--dataPath` |
+| Model Weights | `D:\fela_results` | Input to `--weightsPath` |
+| Best Checkpoint | `D:\fela_results\rwf2000_best_val_acc_Model` | Saved weights prefix |
+
+> ⚠️ Ensure dataset and weights paths match the arguments used in scripts.
+
+---
+
+## 5. Evaluation Fix (Shape Mismatch)
+
+**Issue:** `ValueError` during weight loading due to **sequence length mismatch**:
+
+- SepConvLSTM expects **8 frames**  
+- Original DataGenerator sampled **32 frames**
+
+**Fix:**
+
+1. Set `--modelVidLen 8` when building the model.  
+2. Ensure DataGenerator samples **8 frames per clip**.  
+3. Load weights using:
+
+\`\`\`python
+model.load_weights().expect_partial()
+\`\`\`
+
+**Evaluation Command:**
+
+\`\`\`bash
+python evaluate.py \
   --dataset rwf2000 \
   --batchSize 4 \
   --mode both \
@@ -8,4 +88,24 @@ Two-Stream SepConvLSTM for Real-Time Violence Detection (RWF-2000)This project i
   --weightsPath D:/fela_results \
   --vidLen 32 \
   --modelVidLen 8
-6. Next StepsRun Evaluation: Obtain the final test accuracy using the corrected script.Hyperparameter Tuning: Address the $\mathbf{8\%}$ overfitting gap. This will involve modifying train.py to explore strategies like increasing dropout, applying L2 regularization, and enhancing data augmentation techniques.
+\`\`\`
+
+---
+
+## 6. Next Steps
+
+- Run evaluation to obtain **final test accuracy**.  
+- Tune hyperparameters to reduce **8% overfitting gap**.  
+- Explore strategies like **increased dropout, L2 regularization, and data augmentation**.
+
+---
+
+## 7. References
+
+- [Original GitHub Repository](https://github.com/zahid58/TwoStreamSepConvLSTM_ViolenceDetection)  
+- [RWF-2000 Dataset](https://github.com/andrewssobral/real-world-fighting-dataset)  
+
+---
+
+**Author:** Your Name  
+**Date:** November 2025
