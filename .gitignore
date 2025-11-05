@@ -1,0 +1,71 @@
+# -------------------------------------
+# Git Ignore File for Python Projects
+# -------------------------------------
+
+# --- 1. Virtual Environments ---
+# Common names for virtual environment directories
+.env
+.venv/
+venv/
+ENV/
+env/
+# Specific environment files
+*.bak
+*.dist-info
+
+# --- 2. Python Cache and Compiled Files ---
+__pycache__/
+# Compiled files
+*.pyc
+*.pyo
+*.pyd
+# Cython files
+*.c
+*.so
+
+# --- 3. Datasets and Large Media Files (The Big Ones) ---
+# Directories containing large dataset files
+# Ensure these are not committed to the repo history.
+DATASETS/
+rwf2000/
+imgs/
+fela/
+
+# --- 4. Model Weights and Checkpoints ---
+# Files containing trained model weights
+*.pt
+*.h5
+*.pkl
+*.weights
+*.ckpt
+
+# --- 5. Logs and Output Files ---
+# Logs, temporary files, and generated data
+*.log
+*.tmp
+# Note: You can keep *.csv if you want to track small generated data,
+# but since you had it, it's kept here.
+*.csv
+
+# --- 6. Jupyter/IPython Files ---
+# Checkpoint files created by Jupyter notebooks
+.ipynb_checkpoints/
+# Temporary checkpoints often created by Jupyter
+*.ipynb_checkpoints
+
+# --- 7. System and Hidden Files ---
+# Mac/Linux hidden files
+.DS_Store
+# Windows system files
+Thumbs.db
+desktop.ini
+
+# --- 8. IDE and Editor Folders (VSCode, PyCharm, etc.) ---
+.vscode/
+.idea/
+
+# --- 9. Archives and Compressed Files ---
+*.zip
+*.rar
+*.tar
+*.gz
