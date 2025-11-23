@@ -102,7 +102,6 @@ python evaluate.py \
 
 ## 7. References
 
-- [Original GitHub Repository](https://github.com/zahid58/TwoStreamSepConvLSTM_ViolenceDetection)  
 - [RWF-2000 Dataset](https://github.com/andrewssobral/real-world-fighting-dataset)  
 
 ---
