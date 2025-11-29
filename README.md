@@ -2,7 +2,6 @@
 
 This project implements an efficient deep learning solution for classifying video clips as **"Fight"** or **"NonFight"** using a **Two-Stream MobileNetV2 + SepConvLSTM Network**. The model is optimized for **real-time CCTV surveillance**.
 
-**Reference Repository:** [TwoStreamSepConvLSTM_ViolenceDetection](https://github.com/zahid58/TwoStreamSepConvLSTM_ViolenceDetection)
 
 ---
 
